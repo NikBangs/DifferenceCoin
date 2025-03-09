@@ -2,6 +2,7 @@ import hashlib
 import json
 import time
 import requests
+from flask_cors import CORS
 from flask import Flask, jsonify, request
 from uuid import uuid4
 
@@ -10,7 +11,13 @@ class DifferenceCoinBlockchain:
         self.chain = []
         self.current_transactions = []
         self.nodes = set()
-        self.create_block(proof=1, previous_hash='0')
+
+        # Load blockchain from JSON if available
+        self.load_chain()
+
+        # Create the genesis block if no chain exists
+        if not self.chain:
+            self.create_block(proof=1, previous_hash='0')
 
     def create_block(self, proof, previous_hash):
         block = {
@@ -22,6 +29,10 @@ class DifferenceCoinBlockchain:
         }
         self.current_transactions = []
         self.chain.append(block)
+
+        # Save updated blockchain to JSON
+        self.save_chain()
+
         return block
 
     def new_transaction(self, sender, recipient, amount):
@@ -96,12 +107,26 @@ class DifferenceCoinBlockchain:
 
         if new_chain:
             self.chain = new_chain
+            self.save_chain()
             return True
 
         return False
 
+    def save_chain(self):
+        with open('differencecoin.json', 'w') as f:
+            json.dump(self.chain, f, indent=4)
+
+    def load_chain(self):
+        try:
+            with open('differencecoin.json', 'r') as f:
+                self.chain = json.load(f)
+        except (FileNotFoundError, json.JSONDecodeError):
+            self.chain = []
+
 # Initialize Flask app
 app = Flask(__name__)
+
+CORS(app)
 
 @app.route('/')
 def home():
