@@ -1,0 +1,16 @@
+# Ignore node_modules and build folders across the project
+node_modules/
+build/
+dist/
+
+# Ignore VS Code settings
+.vscode/
+
+# Ignore Python cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Ignore environment files
+.env
